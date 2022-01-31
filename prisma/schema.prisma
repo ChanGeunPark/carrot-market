@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+// previewFeatures = ["referentialIntegrity"] 미리보기기능 [어떤 디비랑 같이 연동되어있는지 보여줌. ex php => left join ]
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id        Int      @id @default(autoincrement()) //@id=unike  autoincrement = 12345
+  phone     Int?     @unique
+  email     String?  @unique
+  name      String
+  avatar    String?
+  createdAt DateTime @default(now()) //디폴트는 지금
+  updatedAt DateTime @updatedAt //업데이트
+}
+
+//데이터

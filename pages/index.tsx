@@ -1,3 +1,4 @@
+import { NextPage } from 'next';
 import Layout from '../component/layout';
 
 const Home: NextPage = () => {
