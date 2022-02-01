@@ -1,13 +1,36 @@
 import { useState } from "react";
+import { useForm } from 'react-hook-form';
 import { cls } from '../libs/utils';
 
+interface EnterForm {
+  email?:"string",
+  phone?:"string",
+}
 
 export default function Enter() {
 
-
+  const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");//< 1 | 2 > 둘중하나 기본은 email
-  const onEmailClick = () => setMethod("email");
-  const onPhoneClick = () => setMethod("phone");
+  const onEmailClick = () =>{ 
+    setMethod("email");
+    reset();
+  }
+  const onPhoneClick = () => {
+    setMethod("phone");
+    reset();
+  }
+
+
+  const onValid = (data:EnterForm) =>{
+    fetch("/api/users/enter", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers:{
+        "Content-Type" : "application/json",
+      }
+    });
+  }
+
   return (
     <div className='mt-16 px-4'>
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
@@ -27,17 +50,25 @@ export default function Enter() {
             </button>
           </div>
         </div>
-        <form className='flex flex-col mt-8'>
+        <form onSubmit={handleSubmit(onValid)} className='flex flex-col mt-8'>
           <label htmlFor="input" className='text-sm font-medium text-gray-700'>
             {method === "email" ? "Email address" : null}
             {method === "phone" ? "Phone number" : null}
           </label>
           <div className='mt-2'>
-            {method === "email" ? <input id="input" type="email" className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent focus:ring-orange-500' required /> : null}
+            {method === "email" ? (
+            <input 
+              {...register("email")}
+              id="input" 
+              type="email" 
+              className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent focus:ring-orange-500' required /> 
+            ) : null}
+            
+            
             {method === "phone" ? (
               <div className='flex rounded-md shadow-sm'>
                 <span className='flex items-center justify-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 select-none text-sm'>+82</span>
-                <input id="input" type="number"  className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent rounded-l-none focus:ring-orange-500' required />
+                <input {...register("phone")} id="input" type="number"  className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent rounded-l-none focus:ring-orange-500' required />
               </div>
             ) : null}
           </div>
@@ -84,4 +115,4 @@ export default function Enter() {
     </div>
   );
 }
-//5.3
+//8.2

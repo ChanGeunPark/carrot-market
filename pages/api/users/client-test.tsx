@@ -13,7 +13,6 @@ await client.user.create({
 },
 });
 
-
 res.json({
   ok:true,
 });
