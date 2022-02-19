@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useForm } from 'react-hook-form';
-import { cls } from '../libs/utils';
+import { cls } from '../libs/client/utils';
+import Button from '../component/button';
+import Input from "../component/input"
+import useMutation from '../libs/client/useMutation';
 
 interface EnterForm {
   email?:"string",
@@ -8,6 +11,11 @@ interface EnterForm {
 }
 
 export default function Enter() {
+  //1. hook으로부터 array를 받는다.
+  //array의 첫번째item은 우리가 호출할 수 있는 function이 될것이다.
+  const [enter,{loading, data, error}] = useMutation('/api/users/enter');//두번째는 상태를 받고싶다.
+  //useMutation은 어떤 url을 mutate할지를 알아야 한다.
+
 
   const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");//< 1 | 2 > 둘중하나 기본은 email
@@ -22,13 +30,7 @@ export default function Enter() {
 
 
   const onValid = (data:EnterForm) =>{
-    fetch("/api/users/enter", {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers:{
-        "Content-Type" : "application/json",
-      }
-    });
+    enter(data);//enter로 데이타를 보내고싶다.
   }
 
   return (
@@ -51,31 +53,29 @@ export default function Enter() {
           </div>
         </div>
         <form onSubmit={handleSubmit(onValid)} className='flex flex-col mt-8'>
-          <label htmlFor="input" className='text-sm font-medium text-gray-700'>
-            {method === "email" ? "Email address" : null}
-            {method === "phone" ? "Phone number" : null}
-          </label>
-          <div className='mt-2'>
-            {method === "email" ? (
-            <input 
-              {...register("email")}
-              id="input" 
-              type="email" 
-              className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent focus:ring-orange-500' required /> 
-            ) : null}
-            
-            
-            {method === "phone" ? (
-              <div className='flex rounded-md shadow-sm'>
-                <span className='flex items-center justify-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 select-none text-sm'>+82</span>
-                <input {...register("phone")} id="input" type="number"  className='appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-transparent rounded-l-none focus:ring-orange-500' required />
-              </div>
-            ) : null}
-          </div>
-          <button className=' mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none'>
-            {method === "email" ? "Get login link" : null}
-            {method === "phone" ? "Get one-time password" : null}
-          </button>
+          {method === "email" ? (
+          <Input
+              register={register("email")}
+              name="email"
+              label="Email address"
+              type="email"
+              required="required"
+          />
+          ) : null}
+          {method === "phone" ? (
+            <Input
+              register={register("phone")}
+              name="phone"
+              label="Phone number"
+              type="number"
+              kind="phone"
+              required
+            />
+          ) : null}
+          {method === "email" ? <Button text={"Get login link"} /> : null}
+          {method === "phone" ? (
+            <Button text={"Get one-time password"} />
+          ) : null}
         </form>
         <div className='mt-6'>
           <div className='relative'>

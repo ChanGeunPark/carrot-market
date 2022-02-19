@@ -2,14 +2,14 @@ import type { NextPage } from "next";
 import Item from '../../component/item';
 import Layout from '../../component/layout';
 
-const Loved: NextPage = () => {
+const Sold: NextPage = () => {
   return (
-    <Layout title="관심목록" canGoBack>
+    <Layout title="판매내역" canGoBack>
       <div className="flex flex-col space-y-5 pb-10  divide-y">
         {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
           <Item
-            key={i}
             id={i}
+            key={i}
             title="iPhone 14"
             price={99}
             comments={1}
@@ -21,4 +21,4 @@ const Loved: NextPage = () => {
   );
 };
 
-export default Loved;
+export default Sold;
