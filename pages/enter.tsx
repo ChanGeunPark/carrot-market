@@ -29,9 +29,10 @@ export default function Enter() {
   }
 
 
-  const onValid = (data:EnterForm) =>{
-    enter(data);//enter로 데이타를 보내고싶다.
+  const onValid = (validForm:EnterForm) =>{
+    enter(validForm);//enter로 데이타를 보내고싶다.
   }
+  console.log(loading,data,error);
 
   return (
     <div className='mt-16 px-4'>
