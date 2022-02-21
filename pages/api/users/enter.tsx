@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import client from '../../../libs/server/client';
-import withHandler from "../../../libs/server/withHandler"
+import client from '@libs/server/client';
+import withHandler from "@libs/server/withHandler"
 
 async function handler(req:NextApiRequest, res:NextApiResponse){
 //클라이언트 핸드러러엔 두개의 prop을 갖는데 한개는 데이터를 보내느것 한개는 데이터를 받는것이다.

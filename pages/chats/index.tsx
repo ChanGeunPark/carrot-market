@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import Layout from '../../component/layout';
+import Layout from '@component/layout';
 
 const Chats: NextPage = () => {
   return (

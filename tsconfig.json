@@ -13,7 +13,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "baseUrl":".",// tsconfig파일이 있는 경로를 지정해줌
+    "paths":{
+      "@libs/*": ["libs/*"],
+      "@component/*":["component/*"]
+    }//파일과 component를 각각 어떻게 import할지를 정할것이다.
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

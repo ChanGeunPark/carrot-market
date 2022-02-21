@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
-import Layout from '../../component/layout';
-import Message from '../../component/message';
+import Layout from '@component/layout';
+import Message from '@component/message';
 
 const Stream: NextPage = () => {
   return (

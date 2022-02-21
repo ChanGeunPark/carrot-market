@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useForm } from 'react-hook-form';
-import { cls } from '../libs/client/utils';
-import Button from '../component/button';
-import Input from "../component/input"
-import useMutation from '../libs/client/useMutation';
+import { cls } from '@libs/client/utils';
+import Button from '@component/button';
+import Input from "@component/input"
+import useMutation from '@libs/client/useMutation';
 
 interface EnterForm {
   email?:"string",
@@ -116,4 +116,4 @@ export default function Enter() {
     </div>
   );
 }
-//82
+//90
