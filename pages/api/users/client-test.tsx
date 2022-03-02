@@ -8,8 +8,8 @@ export default async function handler(
 //NextApiRequest를 ctrl 클릭했을때 옵션을 보여준다.
 await client.user.create({
   data: {
-    email: "hi",
-    name:"hi",
+    email: "hi@asdfasdf",
+    name:"asdfasdf",
 },
 });
 

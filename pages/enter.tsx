@@ -32,7 +32,6 @@ export default function Enter() {
   const onValid = (validForm:EnterForm) =>{
     enter(validForm);//enter로 데이타를 보내고싶다.
   }
-  console.log(loading,data,error);
 
   return (
     <div className='mt-16 px-4'>
@@ -53,7 +52,7 @@ export default function Enter() {
             </button>
           </div>
         </div>
-        <form onSubmit={handleSubmit(onValid)} className='flex flex-col mt-8'>
+        <form onSubmit={handleSubmit(onValid)} className='flex flex-col mt-8 space-y-2'>
           {method === "email" ? (
           <Input
               register={register("email")}
