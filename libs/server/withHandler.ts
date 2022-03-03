@@ -1,5 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+
+
+export interface ResponseType{
+  ok: boolean;
+  [key:string]:any;
+}
+
 export default function whitHandler(
     method : "GET" | "POST" | "DELETE",
     fn : (req : NextApiRequest, res : NextApiResponse) => void

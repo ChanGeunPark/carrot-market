@@ -33,9 +33,9 @@ model Token {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   payload   String   @unique
+  userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    Int
 }
 
 //유저의 이메일이나 폰 번호 정보를 넣어줄거다.

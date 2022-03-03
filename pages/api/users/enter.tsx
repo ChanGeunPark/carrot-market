@@ -1,14 +1,23 @@
+import twilio from 'twilio';
 import { NextApiRequest, NextApiResponse } from 'next';
 import client from '@libs/server/client';
-import withHandler from "@libs/server/withHandler"
+import withHandler, { ResponseType } from "@libs/server/withHandler"
 import { prisma } from '@prisma/client';
 
-async function handler(req:NextApiRequest, res:NextApiResponse){
+
+const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);//env파일이 있으면 process로 불러올 수 있다.
+//wtilio()에 sid와 token을 입력해야함
+
+
+async function handler(req:NextApiRequest, res:NextApiResponse<ResponseType>){
 //클라이언트 핸드러러엔 두개의 prop을 갖는데 한개는 데이터를 보내느것 한개는 데이터를 받는것이다.
 //NextApiRequest를 ctrl 클릭했을때 옵션을 보여준다.
 
 const {phone, email} = req.body;
-const payload = phone? {phone: +phone} : {email};
+const user = phone? {phone: +phone} : email ? {email} : null;
+if(!user) return res.status(400).json({ ok:false }); //status 400  =  bad request
+
+const payload = Math.floor(100000 + Math.random() * 900000) + "";
 /*
 
 const user = await client.user.upsert({
@@ -27,32 +36,44 @@ const user = await client.user.upsert({
 
 const token = await client.token.create({
   data:{
-    payload:'12345',//payload는 유니크여서 중복되면 에러가 뜸
+    payload:payload,//payload는 유니크여서 중복되면 에러가 뜸
     user:{
       connectOrCreate:{
         where:{
-          ...payload,
+          ...user,
         },//여기서 정보를 가지고있지 않으면  -->
         create:{
           name:"Anonymous",
-          ...payload,
+          ...user,
         },
       }
     }
   }
-})
+});
 //우선 user를 upsert하고 token을 생성한 다음에 upsert 했던 user와 연결해줄거다
 //connect는 새로운 토큰을 이미 존재하는 유저와 연결해준다.
 //create는 새로운 token을 만들면서 새로운 user도 만든다.
+
 /*
 connectOrCreate를 사용해서 유저를 찾도록 만들 수 있다. 
 만약 찾는다면 토큰과 connect를 시켜줄거고 찾지 못한다면 생성해줄것이다.
 
 */
+if(phone){
+  const message = await twilioClient.messages.create({
+    messagingServiceSid: process.env.TWILIO_MSID,
+    to: process.env.MY_PHONE!,
+    body: `Your login token is ${payload}.`,
+  });
+  console.log(message);
+}
+//to는 누구에게 메세지를 보내는지 적어줘야함. 이론적으론 request body에서 받은 phone로 보내줘야함.
+//타입스크립트가 에러가 뜨고있으면 !를 붙여서 확실히 존재하는 변수라고 타입스크립트에게 알려준다. MY_PHONE라는 환경변수가 존재하지 않을수도 있다.
 
 
-
-console.log(token);
+return res.json({
+  ok:true,
+});
 //객체안에서 if else를 사용할수 있는 es6문법     ...(phone && {phone: +phone})   phone가 있으면 return{}
 
 /*
@@ -139,7 +160,6 @@ if(!user){
   //   res.status(401).end();
   // }
 
-  res.status(200).end();
   //req.body를 console.log 하고 있고 status 200 을 보내고 있다.
 }
 
