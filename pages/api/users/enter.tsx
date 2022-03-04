@@ -1,3 +1,4 @@
+import mail from '@sendgrid/mail';
 import twilio from 'twilio';
 import { NextApiRequest, NextApiResponse } from 'next';
 import client from '@libs/server/client';
@@ -5,9 +6,10 @@ import withHandler, { ResponseType } from "@libs/server/withHandler"
 import { prisma } from '@prisma/client';
 
 
+
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);//env파일이 있으면 process로 불러올 수 있다.
 //wtilio()에 sid와 token을 입력해야함
-
+mail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 async function handler(req:NextApiRequest, res:NextApiResponse<ResponseType>){
 //클라이언트 핸드러러엔 두개의 prop을 갖는데 한개는 데이터를 보내느것 한개는 데이터를 받는것이다.
@@ -66,6 +68,15 @@ if(phone){
     body: `Your login token is ${payload}.`,
   });
   console.log(message);
+}else if(email){
+  const email = await mail.send({
+    from: "design795@naver.com",//내가 인증했던 메일
+    to: "design795@naver.com",//보낼사람
+    subject:"Your Carrot Market Verification Email",
+    text:`Your token is ${payload}`,
+    html:`<strong>Your token is ${payload}</strong>`
+  })
+  console.log(email);
 }
 //to는 누구에게 메세지를 보내는지 적어줘야함. 이론적으론 request body에서 받은 phone로 보내줘야함.
 //타입스크립트가 에러가 뜨고있으면 !를 붙여서 확실히 존재하는 변수라고 타입스크립트에게 알려준다. MY_PHONE라는 환경변수가 존재하지 않을수도 있다.
