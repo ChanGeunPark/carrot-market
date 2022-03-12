@@ -1,9 +1,18 @@
 //react component고 function과 state를 return 할것이다.
 
+import { privateDecrypt } from 'crypto';
 import { useState } from 'react'
 
 
-export default function useMutation(url:string):[(data:any)=>void, {loading:boolean;data:undefined|any;error:undefined|any}]{
+interface UseMutationState<T>{
+  loading: boolean;
+  data? : T;
+  error? : object;
+}
+
+type UsemutationResult<T> = [(data:any) => void, UseMutationState<T>];
+
+export default function useMutation<T = any>(url:string):UsemutationResult<T>{
   //useMutation의 argument는 url이 될거다.
   //typescript를 사용하고 있다면 useMutation의 return type을 설정해줘야 한다.
   /*
@@ -13,13 +22,15 @@ export default function useMutation(url:string):[(data:any)=>void, {loading:bool
     error: undefined,
   });
 */
+const [state, setState] = useState<UseMutationState<T>>({
+  loading:false,
+  data: undefined,
+  error: undefined,
+});
 
-const [loading, setLoading] = useState(false);
-const [data, setData] = useState<undefined | any>(undefined);
-const [error, setError] = useState<undefined | any>(undefined);
 
   function mutation(data: any){
-    setLoading(true);
+    setState((prev) => ({...prev, loading:true}));
     fetch(url,{
       method:"POST",
       headers:{
@@ -28,9 +39,9 @@ const [error, setError] = useState<undefined | any>(undefined);
       body: JSON.stringify(data),
     })
     .then((response) => response.json().catch(()=>{}))
-    .then(setData)//(json) => setData(json) 줄일수도 있다.
-    .catch(setError).finally(()=> setLoading(false));
+    .then((data) => setState((prev) => ({...prev, data})))//(json) => setData(json) 줄일수도 있다.
+    .catch((error) => setState((prev) => ({...prev, error}))).finally(() => setState((prev) => ({ ...prev, loading: false })));
   }// 백엔드로 보낸 data를 받게 될거다.
 
-  return [mutation, {loading, data, error}];
+  return [mutation, {...state}];
 }

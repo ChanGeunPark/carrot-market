@@ -16,7 +16,7 @@ async function handler(req:NextApiRequest, res:NextApiResponse<ResponseType>){
 //NextApiRequest를 ctrl 클릭했을때 옵션을 보여준다.
 
 const {phone, email} = req.body;
-const user = phone? {phone: +phone} : email ? {email} : null;
+const user = phone? {phone} : email ? {email} : null;
 if(!user) return res.status(400).json({ ok:false }); //status 400  =  bad request
 
 const payload = Math.floor(100000 + Math.random() * 900000) + "";
@@ -62,21 +62,21 @@ connectOrCreate를 사용해서 유저를 찾도록 만들 수 있다.
 
 */
 if(phone){
-  const message = await twilioClient.messages.create({
-    messagingServiceSid: process.env.TWILIO_MSID,
-    to: process.env.MY_PHONE!,
-    body: `Your login token is ${payload}.`,
-  });
-  console.log(message);
+  // const message = await twilioClient.messages.create({
+  //   messagingServiceSid: process.env.TWILIO_MSID,
+  //   to: process.env.MY_PHONE!,
+  //   body: `Your login token is ${payload}.`,
+  // });
+  // console.log(message);
 }else if(email){
-  const email = await mail.send({
-    from: "design795@naver.com",//내가 인증했던 메일
-    to: "design795@naver.com",//보낼사람
-    subject:"Your Carrot Market Verification Email",
-    text:`Your token is ${payload}`,
-    html:`<strong>Your token is ${payload}</strong>`
-  })
-  console.log(email);
+  // const email = await mail.send({
+  //   from: "design795@naver.com",//내가 인증했던 메일
+  //   to: "design795@naver.com",//보낼사람
+  //   subject:"Your Carrot Market Verification Email",
+  //   text:`Your token is ${payload}`,
+  //   html:`<strong>Your token is ${payload}</strong>`
+  // })
+  // console.log(email);
 }
 //to는 누구에게 메세지를 보내는지 적어줘야함. 이론적으론 request body에서 받은 phone로 보내줘야함.
 //타입스크립트가 에러가 뜨고있으면 !를 붙여서 확실히 존재하는 변수라고 타입스크립트에게 알려준다. MY_PHONE라는 환경변수가 존재하지 않을수도 있다.

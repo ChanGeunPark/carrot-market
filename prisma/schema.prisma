@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  phone     BigInt?  @unique
+  phone     String?  @unique
   email     String?  @unique
   name      String
   avatar    String?
@@ -31,7 +31,7 @@ model User {
 
 model Token {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) //user db를 지울때 토큰을 같이 지워준다.
   payload   String   @unique
   userId    Int
   createdAt DateTime @default(now())

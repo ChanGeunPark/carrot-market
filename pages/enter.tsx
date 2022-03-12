@@ -10,10 +10,14 @@ interface EnterForm {
   phone?:"string",
 }
 
+interface EnterMutationResult{
+  ok:boolean;
+}
+
 export default function Enter() {
   //1. hook으로부터 array를 받는다.
   //array의 첫번째item은 우리가 호출할 수 있는 function이 될것이다.
-  const [enter,{loading, data, error}] = useMutation('/api/users/enter');//두번째는 상태를 받고싶다.
+  const [enter,{loading, data, error}] = useMutation<EnterMutationResult>('/api/users/enter');//두번째는 상태를 받고싶다.
   //useMutation은 어떤 url을 mutate할지를 알아야 한다.
 
 
@@ -33,11 +37,15 @@ export default function Enter() {
     enter(validForm);//enter로 데이타를 보내고싶다.
   }
 
+  console.log(data);
+
   return (
     <div className='mt-16 px-4'>
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
       <div className='mt-8'>
-        <div className='flex flex-col items-center'>
+        {data?.ok ? null : <>
+          {/*data가 undefind일수도 있기 때문에 ?를 써준다.*/}
+          <div className='flex flex-col items-center'>
           <h5 className='text-sm text-gray-500 font-medium'>Enter using:</h5>
           <div className='grid mt-8 grid-cols-2 border-b gap-16 w-full'>
             <button 
@@ -77,6 +85,8 @@ export default function Enter() {
             <Button text={"Get one-time password"} />
           ) : null}
         </form>
+        </> }
+
         <div className='mt-6'>
           <div className='relative'>
             <div className='absolute w-full border-t border-gray-300'/>
