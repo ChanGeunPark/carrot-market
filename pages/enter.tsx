@@ -10,6 +10,11 @@ interface EnterForm {
   phone?:"string",
 }
 
+interface TokenForm {
+  token:"string",
+}
+
+
 interface EnterMutationResult{
   ok:boolean;
 }
@@ -22,6 +27,7 @@ export default function Enter() {
 
 
   const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
+  const { register:tokenRegister, handleSubmit: tokenHandleSubmit } = useForm<TokenForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");//< 1 | 2 > 둘중하나 기본은 email
   const onEmailClick = () =>{ 
     setMethod("email");
@@ -43,7 +49,19 @@ export default function Enter() {
     <div className='mt-16 px-4'>
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
       <div className='mt-8'>
-        {data?.ok ? null : <>
+        {data?.ok ? (
+          <form onSubmit={tokenHandleSubmit(onValid)} className='flex flex-col mt-8 space-y-2'>
+
+            <Input
+                register={tokenRegister("token")}
+                name="token"
+                label="Confirmation Token"
+                type="number"
+                required
+            />
+              <Button text={loading ? "Loading" : "Confirm Token"} />
+          </form>
+        ) : <>
           {/*data가 undefind일수도 있기 때문에 ?를 써준다.*/}
           <div className='flex flex-col items-center'>
           <h5 className='text-sm text-gray-500 font-medium'>Enter using:</h5>
