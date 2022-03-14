@@ -15,16 +15,18 @@ interface TokenForm {
 }
 
 
-interface EnterMutationResult{
+interface MutationResult{
   ok:boolean;
 }
 
 export default function Enter() {
   //1. hook으로부터 array를 받는다.
   //array의 첫번째item은 우리가 호출할 수 있는 function이 될것이다.
-  const [enter,{loading, data, error}] = useMutation<EnterMutationResult>('/api/users/enter');//두번째는 상태를 받고싶다.
+  const [enter,{loading, data, error}] = useMutation<MutationResult>('/api/users/enter');//두번째는 상태를 받고싶다.
   //useMutation은 어떤 url을 mutate할지를 알아야 한다.
 
+  const [confirmToken,{loading:tokenLoading, data:tokenData}] = useMutation<MutationResult>('/api/users/confirm');//token
+  //confirmToken 여기에 함수 이름을 바꿀수 있는 이유는 useMutation이 배열을 리턴하기 때문이다.
 
   const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
   const { register:tokenRegister, handleSubmit: tokenHandleSubmit } = useForm<TokenForm>();
@@ -43,14 +45,18 @@ export default function Enter() {
     enter(validForm);//enter로 데이타를 보내고싶다.
   }
 
-  console.log(data);
+  const onTokenValid = (validForm:TokenForm) =>{
+    if(tokenLoading)return; //토큰로딩이 있으면 mutation이 전송되었다는 뜻.
+    confirmToken(validForm);
+  }
+
 
   return (
     <div className='mt-16 px-4'>
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
       <div className='mt-8'>
         {data?.ok ? (
-          <form onSubmit={tokenHandleSubmit(onValid)} className='flex flex-col mt-8 space-y-2'>
+          <form onSubmit={tokenHandleSubmit(onTokenValid)} className='flex flex-col mt-8 space-y-2'>
 
             <Input
                 register={tokenRegister("token")}
@@ -59,7 +65,7 @@ export default function Enter() {
                 type="number"
                 required
             />
-              <Button text={loading ? "Loading" : "Confirm Token"} />
+              <Button text={tokenLoading ? "Loading" : "Confirm Token"} />
           </form>
         ) : <>
           {/*data가 undefind일수도 있기 때문에 ?를 써준다.*/}
