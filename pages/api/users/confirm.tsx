@@ -4,6 +4,14 @@ import withHandler, { ResponseType } from "@libs/server/withHandler";
 import client from '@libs/server/client';
 
 
+declare module "iron-session" {
+  interface IronSessionData{
+    user? : {
+      id: number
+    }
+  }
+}
+
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
 //클라이언트 핸드러러엔 두개의 prop을 갖는데 한개는 데이터를 보내느것 한개는 데이터를 받는것이다.
 //NextApiRequest를 ctrl 클릭했을때 옵션을 보여준다.
@@ -18,16 +26,15 @@ const exists = await client.token.findUnique({where:{
 //여기서 받은 token을 payload로 가지는 Token을 찾는거다.
 //inclued를 사용하려면 우리가 정의한 관계가 필요하다. prisma schima 에 token에 user랑 관계를 한것이 필요함
 
-if (!exists) res.status(404).end();
+if (!exists) return res.status(404).end();
 console.log(exists);
-
 //이 토근을 가진 유저를 찾을거다. 만약 찾는다면 유저 정보를 req.session.user에 담을것이다.
 req.session.user = {
-  id: exists?.userId
-}
+  id: exists.userId
+}//타임스크립트는 여기서끝난다는걸 모르기때문에 상단res 옆 return을 해줘야한다.
 await req.session.save();
 res.status(200).end();
-}
+}//유저가 어떤 내용을 가지는지 정의해줘야함
 
 export default withIronSessionApiRoute(withHandler("POST", handler),{
   cookieName:"carrotsession",
@@ -41,3 +48,4 @@ export default withIronSessionApiRoute(withHandler("POST", handler),{
 //nextjs는 export default를 안해주면 req, res를 받아오지 않는다.
 
 //9.3 token logic
+//todolist
