@@ -13,9 +13,14 @@ export interface ResponseType{
   [key:string]:any;
 }
 
+interface ConfigType {
+  method : "GET" | "POST" | "DELETE",
+  handler : (req : NextApiRequest, res : NextApiResponse) => void,
+  isPrivate?:boolean
+}
+
 export default function whitHandler(
-    method : "GET" | "POST" | "DELETE",
-    fn : (req : NextApiRequest, res : NextApiResponse) => void
+  {method,handler,isPrivate = true} : ConfigType
 ) {
 
   //nextJS가 실행해야 할 것을 return해야한다.
@@ -23,10 +28,13 @@ export default function whitHandler(
   return async function(req : NextApiRequest, res : NextApiResponse) : Promise<any>{
     //promise<void>는 iron-session 에서 promise를 사용하기 때문에 넣어준다.
     if(req.method !== method){
-      res.status(405).end();
+      return res.status(405).end();
     }
+    if(isPrivate && !req.session.user){
+      return res.status(401).json({ok:false,error:"로그인을 해주세요"});//401은 인증되지 않은 요청
+    }//로그인되어있지 않으면 api에 에러가 안나오도록 ok:false를 표출시킬것이다.
     try{
-      await fn(req, res);
+      await handler(req, res);
     } catch(error){
       console.log(error);
       return res.status(500).json({error});

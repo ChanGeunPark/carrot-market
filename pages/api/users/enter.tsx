@@ -183,6 +183,6 @@ if(!user){
 
 
 */
-export default withHandler("POST", handler);//nextjs는 export default를 안해주면 req, res를 받아오지 않는다.
+export default withHandler({method:"POST",handler, isPrivate:false});//nextjs는 export default를 안해주면 req, res를 받아오지 않는다.
 
 //9.3 token logic

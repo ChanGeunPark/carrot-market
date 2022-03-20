@@ -56,7 +56,7 @@ export default function Enter() {
     if(tokenData?.ok){
       router.push("/");
     }
-  },[tokenData, router])
+  },[tokenData, router]);
 
   
   return (
