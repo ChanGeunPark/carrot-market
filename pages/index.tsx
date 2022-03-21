@@ -6,7 +6,7 @@ import useUser from '@libs/client/useUser';
 import Head from 'next/head';
 
 const Home: NextPage = () => {
-  const user = useUser();//로그인 했는지 확인
+  const {user,isLoading} = useUser();//로그인 했는지 확인
   console.log(user);
 
   return (
