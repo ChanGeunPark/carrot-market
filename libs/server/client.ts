@@ -16,6 +16,8 @@ if(process.env.NODE_ENV === "development") global.client = client;
 global.client가 이미 만들어져 있겠지 그래서 global.client에 들어갈거다.
 */
 
+//3분 03초부터 시작
+
 export default client;
 
 
