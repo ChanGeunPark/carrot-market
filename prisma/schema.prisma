@@ -52,3 +52,5 @@ model Product {
   price       Float //소수점이 나올수도 있음
   description String   @db.MediumText
 }
+
+// 우리가 쓰고 있는 PlanetScale은 Vitess로 만들어졌다.

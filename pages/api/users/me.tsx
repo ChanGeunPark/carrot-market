@@ -17,7 +17,7 @@ res.json({
 }
 
 export default withApiSession(withHandler({
-  method:"GET",
+  methods:["GET"],
   handler
 })); 
 // 여기에 핸들러는 유저만 호출할 수 있다.

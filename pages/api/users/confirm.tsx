@@ -40,7 +40,7 @@ await client.token.deleteMany({
 res.json({ok:true});
 }
 
-export default withApiSession(withHandler({method:"POST",handler, isPrivate:false}));
+export default withApiSession(withHandler({methods:["POST"],handler, isPrivate:false}));
 //ironsession은 설정을 해줘야한다. 우선 cookieName을 설정해줘야한다, 두번째는 password를 설정해주는건데 이건 쿠키를 암호화하는데 쓰일거다
 
 //만약 누군가 이 password를 안다면 쿠키를 복호화해 가짜 쿠키를 보낼 수도 있다.

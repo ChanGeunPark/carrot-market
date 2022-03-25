@@ -4,22 +4,32 @@ import Item from '@component/item';
 import Layout from '@component/layout';
 import useUser from '@libs/client/useUser';
 import Head from 'next/head';
+import useSWR from 'swr';
+import { Product } from '@prisma/client';
 
+interface ProductsResponse { 
+  ok : boolean;
+  products: Product[];
+}
 
 const Home: NextPage = () => {
   const {user,isLoading} = useUser();//로그인 했는지 확인
-  console.log(user);
+  const {data} = useSWR<ProductsResponse>("/api/products");
+  /*
+  useSWR을 상뇽할 때
+  데이터가 어떤 모습일지 알려줄 수 있다
+  */
 
   return (
     <Layout title="홈" hasTabBar>
       <Head><title>Home</title></Head>
       <div className="flex flex-col space-y-5 divide-y">
-        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+        {data?.products.map((product) => (
           <Item
-            id={i}
-            key={i}
-            title="iPhone 14"
-            price={99}
+            id={product.id}
+            key={product.id}
+            title={product.name}
+            price={product.price}
             comments={1}
             hearts={1}
           />

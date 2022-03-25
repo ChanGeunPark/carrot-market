@@ -13,21 +13,23 @@ export interface ResponseType{
   [key:string]:any;
 }
 
+type method = "GET" | "POST" | "DELETE";
+
 interface ConfigType {
-  method : "GET" | "POST" | "DELETE",
+  methods : method[],
   handler : (req : NextApiRequest, res : NextApiResponse) => void,
   isPrivate?:boolean
 }
 
 export default function whitHandler(
-  {method,handler,isPrivate = true} : ConfigType
+  {methods,handler,isPrivate = true} : ConfigType
 ) {
 
   //nextJS가 실행해야 할 것을 return해야한다.
   // 이함수가 nextJS가 실행할 함수이다.
   return async function(req : NextApiRequest, res : NextApiResponse) : Promise<any>{
     //promise<void>는 iron-session 에서 promise를 사용하기 때문에 넣어준다.
-    if(req.method !== method){
+    if(req.method && !methods.includes(req.method as any)){//method가 배열에 들어가서 includes를 해서 찾을 것이다.
       return res.status(405).end();
     }
     if(isPrivate && !req.session.user){
