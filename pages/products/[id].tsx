@@ -2,9 +2,12 @@ import type { NextPage } from "next";
 import Button from '@component/button';
 import Layout from '@component/layout';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { Product, User } from '@prisma/client';
 import Link from 'next/link';
+import useMutation from '@libs/client/useMutation';
+import { cls } from '@libs/utils';
+import useUser from '@libs/client/useUser';
 
 interface ProductWithUwer extends Product{
   user:User;
@@ -14,14 +17,34 @@ interface ItemDetailResponse{
   ok:boolean;
   product:ProductWithUwer;
   relatedProducts:Product[];
+  isLiked:boolean;
 }
 
 const ItemDetail: NextPage = () => {
 
+  const {user, isLoading} = useUser();
   const router = useRouter();
-  const {data} = useSWR<ItemDetailResponse>(router.query.id ? `/api/products/${router.query.id}` : null);
+  const {mutate} = useSWRConfig();
+  const {data, mutate:boundMutate} = useSWR<ItemDetailResponse>(router.query.id ? `/api/products/${router.query.id}` : null);
   //router.query.id 가 있으면 api를 보내겠다.
+  const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
+  const onFavClick = () =>{
+    
+    if(!data) return;
+    boundMutate((prev) => prev && {...prev, isLiked:!prev.isLiked}, false);
+    toggleFav({});//body가 비어있는 post 요정이 될것이다. 데이터는 api에서 설정을 해줘서 따로 보낼 필요가 없다.
+    //mutate 첫번째 인자는 뭐든지 넣을수 있고 뭘 넣든간에 그게 새로운 데이터가 되는거다.
+    /*
+      mutate함수는 2개의 인자를 받는데 하하는
+      캐시에 있는 데이터 대신 사용할 새로운 데이터고,
+      다른하나는 ture 또는 false이다
 
+      true는 api를 한번더 검증하게 만든다.
+    ...data.는 이전 캐시의 데이터를 가져오게한다.
+    */
+  //mutate("/api/users/me",(prev:any)=>({ok:!prev.ok}) ,false)
+  //mutate를 다른곳에서도 마음껏 바꿀수 있다.
+  }
 
 
   return (
@@ -48,22 +71,42 @@ const ItemDetail: NextPage = () => {
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
-              <button className="p-3 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-                <svg
-                  className="h-6 w-6 "
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
+              <button
+                onClick={onFavClick}
+                className={cls("transition-all p-3 rounded-md flex items-center justify-center" ,
+                data?.isLiked ? "text-red-400 border-2 border-red-400 hover:bg-red-500 hover:text-white" : "text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+                )}>
+                {
+                  data?.isLiked? (
+                    <svg
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            fillRule="evenodd"
+                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                            clipRule="evenodd"></path>
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-6 w-6 "
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  )
+                }
+                
               </button>
             </div>
           </div>

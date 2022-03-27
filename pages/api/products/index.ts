@@ -9,7 +9,16 @@ import { UserList } from 'twilio/lib/rest/conversations/v1/user';
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
 
 if(req.method === "GET"){
-  const products = await client.product.findMany({});
+  const products = await client.product.findMany({
+    include:{
+      _count:{
+        select:{
+          favs:true,
+        },
+      },
+    },
+  });//그냥 include에 favs를 하면 해당 데이터의 low를 다 가져온다. 그래서 _count에 select를 하는게 좋다.
+
   res.json({
     ok:true,
     products,

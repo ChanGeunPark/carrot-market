@@ -5,9 +5,8 @@ import client from '@libs/server/client';
 import { UserList } from 'twilio/lib/rest/conversations/v1/user';
 
 
-
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
-  const { id } = req.query;
+  const { query:{id}, session:{user} } = req;
   const product = await client.product.findUnique({
       where:{
         id:+id,
@@ -39,17 +38,26 @@ async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>
         }
       }
     }
-  })
+  });
 
+  const isLiked = Boolean(
+    await client.fav.findFirst({
+      where:{
+        productId:product?.id,
+        userId: user?.id,
+      },
+      select:{
+        id:true,
+      }
+    })
+  );
 
   res.json({
     ok:true,
     product,
     relatedProducts,
-  })
-
-
-
+    isLiked,
+  });
 }
 
 export default withApiSession(withHandler({

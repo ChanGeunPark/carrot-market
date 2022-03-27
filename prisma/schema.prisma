@@ -24,6 +24,7 @@ model User {
   updatedAt DateTime  @updatedAt
   tokens    Token[]
   products  Product[]
+  fav       Fav[]
 }
 
 //디폴트는 지금
@@ -51,6 +52,18 @@ model Product {
   name        String
   price       Float //소수점이 나올수도 있음
   description String   @db.MediumText
+  favs        Fav[]
+}
+
+model Fav {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
 }
 
 // 우리가 쓰고 있는 PlanetScale은 Vitess로 만들어졌다.
