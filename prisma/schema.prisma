@@ -15,16 +15,19 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  phone     String?   @unique
-  email     String?   @unique
+  id        Int         @id @default(autoincrement())
+  phone     String?     @unique
+  email     String?     @unique
   name      String
   avatar    String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   tokens    Token[]
   products  Product[]
   fav       Fav[]
+  posts     Post[]
+  answers   Answer[]
+  wondering Wondering[]
 }
 
 //디폴트는 지금
@@ -63,7 +66,39 @@ model Fav {
   productId Int
   createAt  DateTime @default(now())
   updateAt  DateTime @updatedAt
-
 }
 
+model Post {
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  question  String      @db.MediumText
+  createAt  DateTime    @default(now())
+  updateAt  DateTime    @updatedAt
+  answers   Answer[]
+  wondering Wondering[]
+}
+
+model Answer {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   Int
+  anwer    String   @db.MediumText
+}
+
+model Wondering {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   Int
+}
+
+//궁금해요
 // 우리가 쓰고 있는 PlanetScale은 Vitess로 만들어졌다.
