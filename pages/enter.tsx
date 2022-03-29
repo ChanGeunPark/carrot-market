@@ -15,7 +15,6 @@ interface TokenForm {
   token:"string",
 }
 
-
 interface MutationResult{
   ok:boolean;
 }
