@@ -14,7 +14,7 @@ interface WriteForm{
 
 interface WriteResponse{
   ok:boolean;
-  post: Post;
+  community: Post;
 }
 
 
@@ -27,11 +27,12 @@ const Write: NextPage = () => {
     if(loading) return;
     coummunity(data);
   }
+  console.log(data);
 useEffect(()=> {
 if(data && data.ok){
-  router.push(`/community/${data.post.id}`);
+  router.push(`/community/${data.community.id}`);
 }
-},[data]);
+},[data,router]);
 
   return (
     <form className="px-4 py-10" onSubmit={handleSubmit(onValid)}>

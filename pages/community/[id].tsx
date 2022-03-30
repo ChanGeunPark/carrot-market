@@ -1,8 +1,37 @@
 import type { NextPage } from "next";
 import Layout from '@component/layout';
 import TextArea from '@component/textarea';
+import useSWR from 'swr';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import useMutation from '@libs/client/useMutation';
+import { Post, User } from '@prisma/client';
+
+
+interface Answerform{
+  anwer:string;
+}
+interface PostWithUser extends Post{
+  user:User;
+}
+
+interface coummunityPostResponse{
+  ok: boolean;
+  post : PostWithUser;
+}
 
 const CommunityPostDetail: NextPage = () => {
+  const router = useRouter();
+  const {data, error} = useSWR<coummunityPostResponse>(router.query.id ? `/api/community/${router.query.id}` : null);
+  const {register, handleSubmit} = useForm<Answerform>();
+  const [anwer,{data:anwerdata,error:anwererror}] = useMutation(`/api/community/${router.query.id}/answer`);
+
+  const oninvalid = (data:Answerform) =>{
+    anwer(data);
+  }
+
+  console.log(data);
+
   return (
     <Layout canGoBack>
       <div>
@@ -12,7 +41,7 @@ const CommunityPostDetail: NextPage = () => {
         <div className="flex mb-3 px-4 cursor-pointer pb-3  border-b items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-slate-300" />
           <div>
-            <p className="text-sm font-medium text-gray-700">Steve Jebs</p>
+            <p className="text-sm font-medium text-gray-700">{data?.post?.user.name}</p>
             <p className="text-xs font-medium text-gray-500">
               View profile &rarr;
             </p>
@@ -21,7 +50,7 @@ const CommunityPostDetail: NextPage = () => {
         <div>
           <div className="mt-2 px-4 text-gray-700">
             <span className="text-orange-500 font-medium">Q.</span> What is the
-            best mandu restaurant?
+            {data?.post?.question}
           </div>
           <div className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
             <span className="flex space-x-2 items-center text-sm">
@@ -75,18 +104,21 @@ const CommunityPostDetail: NextPage = () => {
           </div>
         </div>
         <div className="px-4">
-          <TextArea
-            name="description"
-            placeholder="Answer this question!"
-            required
-          />
-          <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
-            Reply
-          </button>
+          <form onSubmit={handleSubmit(oninvalid)} >
+            <TextArea
+              register={register("anwer",{required:true,minLength:5})}
+              name="description"
+              placeholder="Answer this question!"
+              required
+            />
+            <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
+              Reply
+            </button>
+          </form>
         </div>
       </div>
     </Layout>
   );
 };
-
+//6:00
 export default CommunityPostDetail;

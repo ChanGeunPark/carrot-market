@@ -2,27 +2,29 @@ import { withApiSession } from '@libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withHandler, { ResponseType } from "@libs/server/withHandler";
 import client from '@libs/server/client';
-import { UserList } from 'twilio/lib/rest/conversations/v1/user';
 
 
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
-  const {body: { question }, session: {user}}= req;
+  const {query:{id} ,body: { anwer }, session: {user}}= req;
 
-  const community = await client.post.create({
+  const answers = await client.answer.create({
     data:{
-      question,
+      anwer,
       user: {
         connect:{
-          id:user?.id
-        }
-      }
+          id:user?.id,
+        },
+      },
+      post:{
+        connect:{
+          id:+id,
+        },
+      },
     }
-  });
-
-
+  })
 
   res.json({
-    community,
+    answers,
     ok:true,
   });
 }
