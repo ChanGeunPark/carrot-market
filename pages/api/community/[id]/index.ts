@@ -18,31 +18,36 @@ async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>
         select:{
           name:true,
           id:true,
-        }
-      }
-    }
-  });
-
-
-  const answer = await client.answer.findMany({
-    where:{
-      postId:+id,
-    },
-    include:{
-      user:{
+        },
+      },
+      answers:{
         select:{
-          name:true,
           id:true,
-        }
-      }
-    }
+          anwer:true,
+          user:{
+            select:{
+              id:true,
+              name:true,
+              avatar:true,
+            }
+          },
+        },
+      },
+      _count:{
+        select:{
+          answers:true,
+          wondering:true,
+        },
+      },
+    },
   });
+
+
 
 
   res.json({
     ok:true,
     post,
-    answer,
   });
 }
 
