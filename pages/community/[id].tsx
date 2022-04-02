@@ -6,6 +6,8 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import useMutation from '@libs/client/useMutation';
 import { Answer, Post, User } from '@prisma/client';
+import { cls } from '@libs/utils';
+import { useEffect } from 'react';
 
 
 interface AnswerRequest{
@@ -28,20 +30,21 @@ interface PostWithUser extends Post{
 interface coummunityPostResponse{
   ok: boolean;
   post : PostWithUser;
+  isWondering:boolean;
 }
 
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
   const {data, mutate} = useSWR<coummunityPostResponse>(router.query.id ? `/api/community/${router.query.id}` : null);
-  const {register, handleSubmit} = useForm<AnswerRequest>();
-  const [anwer,{data:anwerdata,error:anwererror}] = useMutation(`/api/community/${router.query.id}/answer`);
+  const {register, handleSubmit, reset} = useForm<AnswerRequest>();
+  const [anwer,{data:anwerdata,loading:answerLoading}] = useMutation(`/api/community/${router.query.id}/answer`);
 
   const oninvalid = (data:AnswerRequest) =>{
     anwer(data);
   }
   console.log(data);
 
-  const [wonder] = useMutation(`/api/community/${router.query.id}/wonder`);
+  const [wonder,{loading}] = useMutation(`/api/community/${router.query.id}/wonder`);
 
   const onWonderClick = () =>{
     if(!data) return;
@@ -49,13 +52,25 @@ const CommunityPostDetail: NextPage = () => {
       ...data, 
       post:{...data.post,
         _count:{...data.post._count,
-          wondering:data?.post._count.wondering + 1,
+          wondering: !data.isWondering ? data?.post._count.wondering + 1 : data?.post._count.wondering - 1 ,
         },
       },
+      isWondering: !data.isWondering,
     },false);//mutate는 bound mutate이다  request에서 return 된 데이터만 mutate 할수있다.
-    //wonder({});//빈 배열만 보내도 백엔드 api에서 만들어준다. //mutate는 임시로 백엔드에 데이터를 바꿔준다.
+    if(loading) {
+      wonder({});//빈 배열만 보내도 백엔드 api에서 만들어준다. //mutate는 임시로 백엔드에 데이터를 바꿔준다.
+    };
+    
   }
- //9.36 초
+
+  useEffect(()=> {
+    if(anwerdata){
+      reset();
+      mutate();
+    }
+  },[anwerdata,reset,mutate]);
+
+
   return (
     <Layout canGoBack>
       <div>
@@ -77,7 +92,10 @@ const CommunityPostDetail: NextPage = () => {
             {data?.post?.question}
           </div>
           <div className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
-            <button type='button' className="flex space-x-2 items-center text-sm cursor-pointer" onClick={onWonderClick}>
+            <button 
+              type='button' 
+              className={cls('flex space-x-2 items-center text-sm cursor-pointer', data?.isWondering ? "text-green-500" : "")}
+              onClick={onWonderClick}>
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -141,7 +159,7 @@ const CommunityPostDetail: NextPage = () => {
               required
             />
             <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
-              Reply
+              {answerLoading ? "Loading..." : 'Reply'}
             </button>
           </form>
         </div>

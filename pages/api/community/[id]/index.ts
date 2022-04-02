@@ -42,12 +42,21 @@ async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>
     },
   });
 
-
+  const isWondering = Boolean(await client.wondering.findFirst({
+    where:{
+      postId:+id,
+      userId:user?.id,
+    },
+    select:{
+      id:true,
+    }
+  }));
 
 
   res.json({
     ok:true,
     post,
+    isWondering,
   });
 }
 

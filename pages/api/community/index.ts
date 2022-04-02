@@ -6,29 +6,75 @@ import { UserList } from 'twilio/lib/rest/conversations/v1/user';
 
 
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
-  const {body: { question }, session: {user}}= req;
 
-  const community = await client.post.create({
-    data:{
-      question,
-      user: {
-        connect:{
-          id:user?.id
+  if(req.method  === "POST"){
+    const {body: { question, latitude, longitude }, session: {user}, query}= req;
+    const community = await client.post.create({
+      data:{
+        question,
+        latitude,
+        longitude,
+        user: {
+          connect:{
+            id:user?.id
+          }
         }
       }
-    }
-  });
+    });
+
+    res.json({
+      community,
+      ok:true,
+    });
+  }
+
+  if(req.method === "GET"){
+    const {query:{latitude, longitude}} = req;
+    const parsedLatitude = parseFloat(latitude.toString());
+    const parsedLongitude = parseFloat(longitude.toString());
 
 
+    const community = await client.post.findMany({
+      include:{
+        _count:{
+          select:{
+            wondering:true,
+            answers:true,
+          }
+        },
+        user:{
+          select:{
+            name:true,
+            avatar:true,
+          }
+        },
+      },
+      where:{
+        latitude:{
+          gte: parsedLatitude - 0.01,
+          lte: parsedLatitude + 0.01,
+        },
+        longitude:{
+          gte: parsedLongitude - 0.01,
+          lte: parsedLongitude + 0.01,
+        }
+      }
 
-  res.json({
-    community,
-    ok:true,
-  });
+    });
+
+
+    res.json({
+      ok:true,
+      community,
+    });
+  }
+
+
+  
 }
 
 export default withApiSession(withHandler({
-  methods:["POST"],
+  methods:["POST","GET"],
   handler
 })); 
 // 여기에 핸들러는 유저만 호출할 수 있다.
