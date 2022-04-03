@@ -2,11 +2,40 @@ import type { NextPage } from "next";
 import Button from '@component/button';
 import Input from '@component/input';
 import Layout from '@component/layout';
+import useUser from '@libs/client/useUser';
+import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { User } from '@prisma/client';
+import useMutation from '@libs/client/useMutation';
+
+interface EditProfileForm{
+  email? : string;
+  phone? : string;
+  formErrors? : string;
+}
 
 const EditProfile: NextPage = () => {
+
+  const {user} = useUser();
+  const {register, handleSubmit, setValue, setError, formState:{errors}} = useForm<EditProfileForm>();
+  const [editProfile,{data}] = useMutation(`/api/users/enter`);
+
+  useEffect(()=>{
+    if(user?.email) setValue('email', user.email);
+    if(user?.phone) setValue('phone', user.phone);
+  },[user,setValue]);
+
+
+  const onvaild = ({email,phone}:EditProfileForm) =>{
+    if(email === "" && phone === ""){
+      setError('formErrors',{message:"이메일과 핸드폰중에 하나를 선택하여 정보를 입력해주세요"});
+    }
+    //editProfile(form)
+  }
+
   return (
     <Layout canGoBack title="Edit Profile">
-      <form className="py-10 px-4 space-y-4">
+      <form onSubmit={handleSubmit(onvaild)} className="py-10 px-4 space-y-4">
         <div className="flex items-center space-x-3">
           <div className="w-14 h-14 rounded-full bg-slate-500" />
           <label
@@ -22,14 +51,22 @@ const EditProfile: NextPage = () => {
             />
           </label>
         </div>
-        <Input required label="Email address" name="email" type="email" />
         <Input
-          required
+            register={register("email")}
+            required={false}
+            label="Email address"
+            name="email"
+            type="email"
+        />
+        <Input
+          register={register("phone")}
+          required={false}
           label="Phone number"
           name="phone"
           type="number"
           kind="phone"
         />
+        {errors ?<p className='text-sm text-red-500'>{errors.formErrors?.message}</p> : null}
         <Button text="Update profile" />
       </form>
     </Layout>

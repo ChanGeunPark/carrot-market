@@ -1,9 +1,17 @@
+import { User } from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react'
 import useSWR from 'swr';
 
+
+
+interface ProfileResponse {
+  ok:boolean;
+  profile:User;
+}
+
 export default function useUser(){
-  const {data, error} = useSWR("/api/users/me");
+  const {data, error} = useSWR<ProfileResponse>("/api/users/me");
   //첫번째 인자가 url이 아니라 key라고 불리는 이유는 url이 api를 요청할 url이기도 하면서 캐시를 저장할때 사용할 key이기도 한다.
   const router = useRouter();
   useEffect(()=>{
