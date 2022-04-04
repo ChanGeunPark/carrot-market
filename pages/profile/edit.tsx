@@ -7,31 +7,53 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { User } from '@prisma/client';
 import useMutation from '@libs/client/useMutation';
+import { useRouter } from 'next/router';
 
 interface EditProfileForm{
   email? : string;
   phone? : string;
+  name? : string;
   formErrors? : string;
 }
+
+interface EditProfileResponse{
+  ok:boolean;
+  error?:string;
+}
+
 
 const EditProfile: NextPage = () => {
 
   const {user} = useUser();
   const {register, handleSubmit, setValue, setError, formState:{errors}} = useForm<EditProfileForm>();
-  const [editProfile,{data}] = useMutation(`/api/users/enter`);
+  const [editProfile,{data, loading}] = useMutation<EditProfileResponse>(`/api/users/me`);
+  const router = useRouter();
 
+
+console.log(data);
   useEffect(()=>{
     if(user?.email) setValue('email', user.email);
     if(user?.phone) setValue('phone', user.phone);
+    if(user?.name) setValue("name" , user.name);
   },[user,setValue]);
 
-
-  const onvaild = ({email,phone}:EditProfileForm) =>{
-    if(email === "" && phone === ""){
-      setError('formErrors',{message:"이메일과 핸드폰중에 하나를 선택하여 정보를 입력해주세요"});
+  useEffect(()=>{
+    if(data && !data?.ok){
+      setError("formErrors", {message:data.error});
     }
-    //editProfile(form)
-  }
+
+    if(data?.ok === true){
+      alert("변경완료");
+    }
+  },[data]);
+
+  const onvaild = ({email,phone,name}:EditProfileForm) =>{
+    if(loading) return;
+    if(email === "" && phone === "" && name === ""){
+      return setError('formErrors',{message:"이메일과 핸드폰중에 하나를 선택하여 정보를 입력해주세요"});
+    }
+    editProfile({email: email !== user?.email ? email : "",phone: phone !== user?.phone ? phone : "",name:name !== user?.name ? name : ""});
+  };
 
   return (
     <Layout canGoBack title="Edit Profile">
@@ -52,6 +74,13 @@ const EditProfile: NextPage = () => {
           </label>
         </div>
         <Input
+            register={register("name")}
+            required={false}
+            label="Name"
+            name="Name"
+            type="text"
+        />
+        <Input
             register={register("email")}
             required={false}
             label="Email address"
@@ -67,7 +96,7 @@ const EditProfile: NextPage = () => {
           kind="phone"
         />
         {errors ?<p className='text-sm text-red-500'>{errors.formErrors?.message}</p> : null}
-        <Button text="Update profile" />
+        <Button text={loading ? "Loading..." : "Update profile"} />
       </form>
     </Layout>
   );
