@@ -8,9 +8,7 @@ const client = global.client || new PrismaClient();
 if(process.env.NODE_ENV === "development") global.client = client;
 
 /*
-
 newPrismaClient({log:["query"]}) == client 가 쿼리를 얼마나 불러오는지 알수 있다.
-
 이 파일을 처음 실행하면 global.client에 아무것도 들어있지 않을것이다.
 그러면 새 PrismaClient를 만드는 것이다.
 그렇게 처음 파일이 실행될 때
