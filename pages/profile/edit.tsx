@@ -54,31 +54,30 @@ const EditProfile: NextPage = () => {
 
     if(avatar && avatar.length > 0 && user){
 
-      const {id, uploadURL} = await (await fetch(`/api/files`)).json();
+      const {uploadURL} = await (await fetch(`/api/files`)).json();
       // Cloudflare에게 URL을 요청한다.
       const form = new FormData();
       form.append("file",avatar[0], user?.id+"");//첫번째 name , 두번째 blob , 세번째 file name 
-      await fetch(uploadURL,{
+      const {result: {id}} = await(await fetch(uploadURL,{
         method:"POST",
         body:form,
-      })
+      })).json();
       // URL을 받으면 파일을 업로드한다
-      return;
       editProfile({
-        email: email !== user?.email ? email : "",
-        phone: phone !== user?.phone ? phone : "",
-        name:name !== user?.name ? name : "",
-        //avartarUrl:CF URL
+        email,
+        phone,
+        name,
+        avartarId:id,
       });
     }else{
       editProfile({
-        email: email !== user?.email ? email : "",
-        phone: phone !== user?.phone ? phone : "",
-        name:name !== user?.name ? name : ""
+        email,
+        phone,
+        name,
       });
     }
-
   };
+  
 const avatar = watch("avatar");
 useEffect(()=>{
   if(avatar && avatar.length > 0){
@@ -91,7 +90,7 @@ useEffect(()=>{
     <Layout canGoBack title="Edit Profile">
       <form onSubmit={handleSubmit(onvaild)} className="py-10 px-4 space-y-4">
         <div className="flex items-center space-x-3">
-          {avatarPreview ? <div className='w-14 h-14 overflow-hidden rounded-full bg-slate-500'><img src={avatarPreview} className="w-full h-full object-cover"/></div> : <div className="w-14 h-14 rounded-full bg-slate-500" />  }
+          {avatarPreview ? <div className='w-14 h-14 overflow-hidden rounded-full bg-slate-500'><img src={avatarPreview} className="w-full h-full object-cover"/></div> : user?.avatar ? <img src={`https://imagedelivery.net/anvL-_ABM0Z5KQo2YmJX4g/${user?.avatar}/avatar`} className="w-16 h-16 bg-slate-500 rounded-full" /> : <div className="w-14 h-14 rounded-full bg-slate-500" />  }
           <label
             htmlFor="picture"
             className="cursor-pointer py-2 px-3 border hover:bg-gray-50 border-gray-300 rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 text-gray-700"

@@ -7,10 +7,10 @@ import client from '@libs/server/client';
 
 async function handler(req : NextApiRequest, res : NextApiResponse<ResponseType>) {
 
-  
+  console.log(req.body);
 
 if(req.method === "POST"){
-  const {session:{user}, body:{email, phone, name}} = req;
+  const {session:{user}, body:{email, phone, name, avartarId}} = req;
 
   const currentUser = await client.user.findUnique ({
     where:{
@@ -82,9 +82,17 @@ if(req.method === "POST"){
     res.json({ok:true});
 
   }
+  if(avartarId){
+    await client.user.update({
+      where:{
+        id:user?.id,
+      },
+      data:{
+        avatar:avartarId,
+      }
+    })
+  }
   res.json({ok:true})
-
-
 
 }
 

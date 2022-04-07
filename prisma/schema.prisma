@@ -19,7 +19,7 @@ model User {
   phone           String?     @unique
   email           String?     @unique
   name            String
-  avatar          String?
+  avatar          String?     @db.MediumText
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   tokens          Token[]
