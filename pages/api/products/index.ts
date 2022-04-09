@@ -26,13 +26,13 @@ if(req.method === "GET"){
 }
 if(req.method === "POST"){
   const {
-    body: { name, price, description}, 
+    body: { name, price, description, photoId}, 
     session: {user}
   }= req;
 
   const product = await client.product.create({
     data:{
-      image:"xx",
+      image:photoId,
       name,
       price:+price,
       description,

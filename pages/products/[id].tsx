@@ -8,6 +8,7 @@ import Link from 'next/link';
 import useMutation from '@libs/client/useMutation';
 import { cls } from '@libs/utils';
 import useUser from '@libs/client/useUser';
+import Image from 'next/image';
 
 interface ProductWithUwer extends Product{
   user:User;
@@ -47,13 +48,23 @@ const ItemDetail: NextPage = () => {
   }
 
 
+//remote 이미지를 불러오려면(다른서버) naxt.js에 Image는 어디 서버에서 가져오는지 물어볼거다
+// next.config 에서 설정을 해줘야한다.
+
   return (
     <Layout canGoBack>
       <div className="px-4  py-4">
         <div className="mb-8">
-          <div className="h-96 bg-slate-300" />
+          <div className='relative w-full pb-80'>
+            <Image layout='fill' src={`https://imagedelivery.net/anvL-_ABM0Z5KQo2YmJX4g/${data?.product.image}/public`} className="h-96 bg-slate-300 object-cover" />
+          </div>
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-slate-300" />
+            {user?.avatar ? (
+              <Image 
+                width={48}
+                height={48}
+                src={`https://imagedelivery.net/anvL-_ABM0Z5KQo2YmJX4g/${user?.avatar}/avatar`} className="w-12 h-12 rounded-full bg-slate-300" alt="avatar" />
+            ) : <div className="w-12 h-12 rounded-full bg-slate-300" /> }
             <div>
               <p className="text-sm font-medium text-gray-700">{data?.product?.user?.name}</p>
               <Link href={`/users/profiles/${data?.product?.user?.id}`}>

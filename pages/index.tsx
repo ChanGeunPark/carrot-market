@@ -6,6 +6,8 @@ import useUser from '@libs/client/useUser';
 import Head from 'next/head';
 import useSWR from 'swr';
 import { Product } from '@prisma/client';
+import Image from 'next/image';
+import sucullentImage from "../public/cacti-1845159_1920.jpg";
 
 export interface ProductWithCount extends Product{
   _count:{
@@ -33,6 +35,7 @@ const Home: NextPage = () => {
         {data?.products?.map((product) => (
           <Item
             id={product.id}
+            images={product.image}
             key={product.id}
             title={product.name}
             price={product.price}
@@ -58,6 +61,7 @@ const Home: NextPage = () => {
           </svg>
         </FloatingButton>
       </div>
+      <Image src={sucullentImage} placeholder="blur" quality="70"/>
     </Layout>
   );
 };
