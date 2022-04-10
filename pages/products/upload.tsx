@@ -66,7 +66,7 @@ useEffect(() => {
 },[photo])
 
   return (
-    <Layout canGoBack title="Upload Product">
+    <Layout canGoBack title="Upload Product" seoTitle='Product Detail'>
       <form className="p-4 space-y-4" onSubmit={handleSubmit(onValid)}>
         <div>
           {

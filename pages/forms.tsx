@@ -38,7 +38,7 @@ export default function Forms(){
 
 
   return(
-    <form onSubmit={handleSubmit(onValid, onInValid)}>
+    <form onSubmit={handleSubmit(onValid)}>
     <input
       {...register("username",{
         required:"Username is required",

@@ -1,10 +1,23 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { cls } from '@libs/client/utils';
 import Button from '@component/button';
 import Input from "@component/input"
 import useMutation from '@libs/client/useMutation';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
+
+
+//const Bs = dynamic(()=> import("@component/bs"),{ssr:false});// 유저가 화면을 보고있어야만 다운로드해서 보여준다.
+//dynamic은 서버사이트에서 로딩하지 않게 설정할 수도 있다.
+
+const Bs = dynamic(
+  //@ts-ignore
+  () => new Promise(resolve => setTimeout(() => {
+    resolve(import ("@component/bs"))
+}, 10000)), {ssr: false, suspense:true});
+//옵션을 줄 수 있다. loading:() => <span>Loading...</span>
+//10초칸 컴포넌트를 불러오게 할거다
 
 interface EnterForm {
   email?:"string",
@@ -102,14 +115,20 @@ export default function Enter() {
           />
           ) : null}
           {method === "phone" ? (
-            <Input
-              register={register("phone")}
-              name="phone"
-              label="Phone number"
-              type="number"
-              kind="phone"
-              required
-            />
+            <>
+            <Suspense fallback="LodingSomething big">{/**react8 에선 suspense를 지원한다. */}
+              <Bs />
+            </Suspense>
+              
+              <Input
+                register={register("phone")}
+                name="phone"
+                label="Phone number"
+                type="number"
+                kind="phone"
+                required
+              />
+            </>
           ) : null}
           {method === "email" ? <Button text={"Get login link"} /> : null}
           {method === "phone" ? (

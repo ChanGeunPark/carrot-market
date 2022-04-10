@@ -1,10 +1,13 @@
-import type { NextPage } from "next";
+import type { NextPage, NextPageContext } from "next";
 import Link from "next/link";
 import Layout from '@component/layout';
-import useSWR from 'swr';
+import useSWR, { SWRConfig } from 'swr';
 import useUser from '@libs/client/useUser';
 import { Review, User } from '@prisma/client';
 import { cls } from '@libs/utils';
+import Image from 'next/image';
+import { withSsrSession } from '@libs/server/withSession';
+import client from "@libs/server/client";
 
 
 interface ReviewWhitUser extends Review{
@@ -26,7 +29,9 @@ const Profile: NextPage = () => {
     <Layout hasTabBar title="나의 캐럿">
       <div className="px-4">
         <div className="flex items-center mt-4 space-x-3">
-          {user?.avatar ? <img src={`https://imagedelivery.net/anvL-_ABM0Z5KQo2YmJX4g/${user?.avatar}/public`} className="w-16 h-16 bg-slate-500 rounded-full" /> : <div className="w-16 h-16 bg-slate-500 rounded-full" /> }
+          <div className='relative w-16 h-16'>
+            {user?.avatar ? <Image layout='fill' quality="100" src={`https://imagedelivery.net/anvL-_ABM0Z5KQo2YmJX4g/${user?.avatar}/public`} className="w-16 h-16 bg-slate-500 rounded-full object-cover" /> : <div className="w-16 h-16 bg-slate-500 rounded-full" /> }
+          </div>
           <div className="flex flex-col">
             <span className="font-medium text-gray-900">{user?.name}</span>
             <Link href="/profile/edit">
@@ -141,4 +146,35 @@ const Profile: NextPage = () => {
   );
 };
 
-export default Profile;
+const Page:NextPage<{profile:User}> = ({profile}) => {
+  return <SWRConfig value={{
+    fallback:{
+      "/api/users/me": {ok:true, profile},
+    }
+  }}>
+    <Profile/>
+  </SWRConfig>
+}
+
+
+export const getServerSideProps = withSsrSession(async function({req}: NextPageContext){//context = 문맥
+  const profile = await client.user.findUnique({
+      where: { id: req?.session.user?.id }
+  })
+  return {
+    props: {
+      profile: JSON.parse(JSON.stringify(profile))
+    }
+  }
+})//getServerSideProps를 withSsrSession함수로 감싸주고있다.
+//단순히 getServerSideProps 라는 걸 만들어준 다음 export를 해준거다.
+
+
+
+
+
+
+
+
+
+export default Page;
