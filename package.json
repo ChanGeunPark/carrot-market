@@ -14,7 +14,7 @@
     "bootstrap-icons": "^1.7.2",
     "gray-matter": "^4.0.3",
     "iron-session": "^6.0.5",
-    "next": "^12.0.8",
+    "next": "^12.1.0",
     "react": "^18.0.0-rc.0",
     "react-dom": "^18.0.0-rc.0",
     "react-hook-form": "^7.25.3",
