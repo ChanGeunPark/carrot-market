@@ -1,151 +1,177 @@
 import { Suspense, useEffect, useState } from "react";
-import { useForm } from 'react-hook-form';
-import { cls } from '@libs/client/utils';
-import Button from '@component/button';
-import Input from "@component/input"
-import useMutation from '@libs/client/useMutation';
-import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
-
+import { useForm } from "react-hook-form";
+import { cls } from "@libs/client/utils";
+import Button from "@component/button";
+import Input from "@component/input";
+import useMutation from "@libs/client/useMutation";
+import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
 //const Bs = dynamic(()=> import("@component/bs"),{ssr:false});// 유저가 화면을 보고있어야만 다운로드해서 보여준다.
 //dynamic은 서버사이트에서 로딩하지 않게 설정할 수도 있다.
 
+/*
 const Bs = dynamic(
   //@ts-ignore
   () => new Promise(resolve => setTimeout(() => {
     resolve(import ("@component/bs"))
 }, 10000)), {ssr: false, suspense:true});
+
+*/
+
 //옵션을 줄 수 있다. loading:() => <span>Loading...</span>
 //10초칸 컴포넌트를 불러오게 할거다
 
 interface EnterForm {
-  email?:"string",
-  phone?:"string",
+  email?: "string";
+  phone?: "string";
 }
 
 interface TokenForm {
-  token:"string",
+  token: "string";
 }
 
-interface MutationResult{
-  ok:boolean;
+interface MutationResult {
+  ok: boolean;
 }
 
 export default function Enter() {
   //1. hook으로부터 array를 받는다.
   //array의 첫번째item은 우리가 호출할 수 있는 function이 될것이다.
-  const [enter,{loading, data, error}] = useMutation<MutationResult>('/api/users/enter');//두번째는 상태를 받고싶다.
+  const [enter, { loading, data, error }] =
+    useMutation<MutationResult>("/api/users/enter"); //두번째는 상태를 받고싶다.
   //useMutation은 어떤 url을 mutate할지를 알아야 한다.
 
-  const [confirmToken,{loading:tokenLoading, data:tokenData}] = useMutation<MutationResult>('/api/users/confirm');//token
+  const [confirmToken, { loading: tokenLoading, data: tokenData }] =
+    useMutation<MutationResult>("/api/users/confirm"); //token
   //confirmToken 여기에 함수 이름을 바꿀수 있는 이유는 useMutation이 배열을 리턴하기 때문이다.
 
   const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
-  const { register:tokenRegister, handleSubmit: tokenHandleSubmit } = useForm<TokenForm>();
-  const [method, setMethod] = useState<"email" | "phone">("email");//< 1 | 2 > 둘중하나 기본은 email
-  const onEmailClick = () =>{ 
+  const { register: tokenRegister, handleSubmit: tokenHandleSubmit } =
+    useForm<TokenForm>();
+  const [method, setMethod] = useState<"email" | "phone">("email"); //< 1 | 2 > 둘중하나 기본은 email
+  const onEmailClick = () => {
     setMethod("email");
     reset();
-  }
+  };
   const onPhoneClick = () => {
     setMethod("phone");
     reset();
-  }
+  };
 
+  const onValid = (validForm: EnterForm) => {
+    enter(validForm); //enter로 데이타를 보내고싶다.
+  };
 
-  const onValid = (validForm:EnterForm) =>{
-    enter(validForm);//enter로 데이타를 보내고싶다.
-  }
-
-  const onTokenValid = (validForm:TokenForm) =>{
-    if(tokenLoading)return; //토큰로딩이 있으면 mutation이 전송되었다는 뜻.
+  const onTokenValid = (validForm: TokenForm) => {
+    if (tokenLoading) return; //토큰로딩이 있으면 mutation이 전송되었다는 뜻.
     confirmToken(validForm);
-  }
+  };
 
   const router = useRouter();
-  useEffect(()=>{
-    if(tokenData?.ok){
+  useEffect(() => {
+    if (tokenData?.ok) {
       router.push("/");
     }
-  },[tokenData, router]);
+  }, [tokenData, router]);
 
-  
   return (
-    <div className='mt-16 px-4'>
+    <div className="mt-16 px-4">
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
-      <div className='mt-8'>
+      <div className="mt-8">
         {data?.ok ? (
-          <form onSubmit={tokenHandleSubmit(onTokenValid)} className='flex flex-col mt-8 space-y-2'>
-
+          <form
+            onSubmit={tokenHandleSubmit(onTokenValid)}
+            className="flex flex-col mt-8 space-y-2"
+          >
             <Input
-                register={tokenRegister("token")}
-                name="token"
-                label="Confirmation Token"
-                type="number"
-                required
+              register={tokenRegister("token")}
+              name="token"
+              label="Confirmation Token"
+              type="number"
+              required
             />
-              <Button text={tokenLoading ? "Loading" : "Confirm Token"} />
+            <Button text={tokenLoading ? "Loading" : "Confirm Token"} />
           </form>
-        ) : <>
-          {/*data가 undefind일수도 있기 때문에 ?를 써준다.*/}
-          <div className='flex flex-col items-center'>
-          <h5 className='text-sm text-gray-500 font-medium'>Enter using:</h5>
-          <div className='grid mt-8 grid-cols-2 border-b gap-16 w-full'>
-            <button 
-              className={cls("pb-4 font-medium border-b-2 transition-all",method == "email" ? "border-orange-500 text-orange-400" : "border-transparent text-gray-500")} 
-              onClick={onEmailClick}>
-                Email
-            </button>
-            <button 
-              className={`pb-4 font-medium border-b-2 transition-all ${method == "phone" ? " border-orange-500 text-orange-400" : "border-transparent text-gray-500"}`}
-              onClick={onPhoneClick}>
-                Phone
-            </button>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit(onValid)} className='flex flex-col mt-8 space-y-2'>
-          {method === "email" ? (
-          <Input
-              register={register("email")}
-              name="email"
-              label="Email address"
-              type="email"
-              required="required"
-          />
-          ) : null}
-          {method === "phone" ? (
-            <>
-            <Suspense fallback="LodingSomething big">{/**react8 에선 suspense를 지원한다. */}
+        ) : (
+          <>
+            {/*data가 undefind일수도 있기 때문에 ?를 써준다.*/}
+            <div className="flex flex-col items-center">
+              <h5 className="text-sm text-gray-500 font-medium">
+                Enter using:
+              </h5>
+              <div className="grid mt-8 grid-cols-2 border-b gap-16 w-full">
+                <button
+                  className={cls(
+                    "pb-4 font-medium border-b-2 transition-all",
+                    method == "email"
+                      ? "border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500"
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email
+                </button>
+                <button
+                  className={`pb-4 font-medium border-b-2 transition-all ${
+                    method == "phone"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500"
+                  }`}
+                  onClick={onPhoneClick}
+                >
+                  Phone
+                </button>
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit(onValid)}
+              className="flex flex-col mt-8 space-y-2"
+            >
+              {method === "email" ? (
+                <Input
+                  register={register("email")}
+                  name="email"
+                  label="Email address"
+                  type="email"
+                  required="required"
+                />
+              ) : null}
+              {method === "phone" ? (
+                <>
+                  {/* <Suspense fallback="LodingSomething big">react8 에선 suspense를 지원한다. 
               <Bs />
-            </Suspense>
-              
-              <Input
-                register={register("phone")}
-                name="phone"
-                label="Phone number"
-                type="number"
-                kind="phone"
-                required
-              />
-            </>
-          ) : null}
-          {method === "email" ? <Button text={"Get login link"} /> : null}
-          {method === "phone" ? (
-            <Button text={"Get one-time password"} />
-          ) : null}
-        </form>
-        </> }
+            </Suspense> */}
 
-        <div className='mt-6'>
-          <div className='relative'>
-            <div className='absolute w-full border-t border-gray-300'/>
-            <div className='relative -top-3 text-center'>
-              <span className='bg-white px-2 text-sm text-gray-500'>Or enter with</span>
+                  <Input
+                    register={register("phone")}
+                    name="phone"
+                    label="Phone number"
+                    type="number"
+                    kind="phone"
+                    required
+                  />
+                </>
+              ) : null}
+              {method === "email" ? <Button text={"Get login link"} /> : null}
+              {method === "phone" ? (
+                <Button text={"Get one-time password"} />
+              ) : null}
+            </form>
+          </>
+        )}
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute w-full border-t border-gray-300" />
+            <div className="relative -top-3 text-center">
+              <span className="bg-white px-2 text-sm text-gray-500">
+                Or enter with
+              </span>
             </div>
           </div>
-          <div className='grid grid-cols-2 gap-3 mt-2'>
-            <button className='flex justify-center items-center py-2 px-4 border border-gray-400 rounded-md shadow-sm bg-white font-medium text-gray-500 hover:bg-gray-100 transition-all'>
+          <div className="grid grid-cols-2 gap-3 mt-2">
+            <button className="flex justify-center items-center py-2 px-4 border border-gray-400 rounded-md shadow-sm bg-white font-medium text-gray-500 hover:bg-gray-100 transition-all">
               <svg
                 className="w-5 h-5"
                 aria-hidden="true"
@@ -155,7 +181,7 @@ export default function Enter() {
                 <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
               </svg>
             </button>
-            <button className='flex justify-center items-center py-2 px-4 border border-gray-400 rounded-md shadow-sm bg-white font-medium text-gray-500 hover:bg-gray-100 transition-all'>
+            <button className="flex justify-center items-center py-2 px-4 border border-gray-400 rounded-md shadow-sm bg-white font-medium text-gray-500 hover:bg-gray-100 transition-all">
               <svg
                 className="w-5 h-5"
                 aria-hidden="true"
